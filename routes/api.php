@@ -118,6 +118,7 @@ Route::get('Puntos/{id}',[NuevosPuntosController::class, 'showID']);
 
 Route::put('Punto-status/{id}',[NuevosPuntosController::class,'editStatus']);
 
+Route::get('/storage/galeria/{nombreImagen}',[NuevosPuntosController::class, 'showImage']);
 
 ////Voluntariados
 Route::put('voluntariado-update/{id}', [VOluntariadosController::class, 'updateVOluntariados']);

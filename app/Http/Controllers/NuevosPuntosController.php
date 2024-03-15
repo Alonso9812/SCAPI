@@ -27,32 +27,44 @@ class NuevosPuntosController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-            $request->validate([
-                'nombrePunto' => 'required',
-                'descripcionPunto' => 'required',
-                'ubicacionPunto' => 'required',
-                'galeria' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096', // Permitir archivos de hasta 4MB
-            ]);
-        
-            $imagen = $request->file('galeria');
-            $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
-            $imagen->storeAs('public/galeria', $nombreImagen);
-        
-            $nuevosPuntos = new NuevosPuntos();
-            $nuevosPuntos->nombrePunto = $request->input('nombrePunto');
-            $nuevosPuntos->descripcionPunto = $request->input('descripcionPunto');
-            $nuevosPuntos->ubicacionPunto = $request->input('ubicacionPunto');
-            $nuevosPuntos->galeria = $nombreImagen;
-            $nuevosPuntos->save();
-        
-            return response()->json([
-                'status' => 1,
-                'msg' => '¡Nuevo punto de interes agregado exitosamente!',
-            ]);
-        
-    }
+{
+    $request->validate([
+        'nombrePunto' => 'required',
+        'descripcionPunto' => 'required',
+        'ubicacionPunto' => 'required',
+        'galeria' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096', // Permitir archivos de hasta 4MB
+    ]);
 
+    $imagen = $request->file('galeria');
+    $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
+    
+    // Almacenar la imagen en el directorio public/galeria
+    $imagen->move(public_path('storage\galeria'), $nombreImagen);
+
+    $nuevosPuntos = new NuevosPuntos();
+    $nuevosPuntos->nombrePunto = $request->input('nombrePunto');
+    $nuevosPuntos->descripcionPunto = $request->input('descripcionPunto');
+    $nuevosPuntos->ubicacionPunto = $request->input('ubicacionPunto');
+    $nuevosPuntos->galeria = $nombreImagen;
+    $nuevosPuntos->save();
+
+    return response()->json([
+        'status' => 1,
+        'msg' => '¡Nuevo punto de interés agregado exitosamente!',
+    ]);
+}
+
+    public function showImage($nombreImagen)
+    {
+        $rutaImagen = storage_path('app/public/galeria/' . $nombreImagen);
+    
+        if (!file_exists($rutaImagen)) {
+            abort(404);
+        }
+    
+        return response()->file($rutaImagen);
+    }
+    
     /**
      * Display the specified resource.
      */
@@ -99,45 +111,50 @@ class NuevosPuntosController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, NuevosPuntos $nuevosPuntos, $id)
-    {
-        $request->validate([
-            'nombrePunto' => 'required',
-            'descripcionPunto' => 'required',
-            'ubicacionPunto' => 'required',
-            'galeria' => 'image|mimes:jpeg,png,jpg,gif|max:4096', // Permitir archivos de hasta 4MB
-        ]);
+  /**
+ * Update the specified resource in storage.
+ */
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'nombrePunto' => 'required',
+        'descripcionPunto' => 'required',
+        'ubicacionPunto' => 'required',
+        'galeria' => 'image|mimes:jpeg,png,jpg,gif|max:4096', // Permitir archivos de hasta 4MB
+    ]);
 
-        $nuevosPuntos = NuevosPuntos::find($id);
+    $nuevosPuntos = NuevosPuntos::find($id);
 
-        if (!$nuevosPuntos) {
-            return response()->json([
-                'status' => 0,
-                'msg' => 'Registro no encontrado',
-            ]);
-        }
-
-        // Actualiza los campos si se proporcionan en la solicitud
-        $nuevosPuntos->nombrePunto = $request->input('nombrePunto', $nuevosPuntos->nombrePunto);
-        $nuevosPuntos->descripcionPunto = $request->input('descripcionPunto', $nuevosPuntos->descripcionPunto);
-        $nuevosPuntos->ubicacionPunto = $request->input('ubicacionPunto', $nuevosPuntos->ubicacionPunto);
-
-        // Verifica si se proporcionó una nueva imagen
-        if ($request->hasFile('galeria')) {
-            $imagen = $request->file('galeria');
-            $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
-            $imagen->storeAs('public/galeria', $nombreImagen);
-            $nuevosPuntos->galeria = $nombreImagen;
-        }
-
-        $nuevosPuntos->save();
-
+    if (!$nuevosPuntos) {
         return response()->json([
-            'status' => 1,
-            'msg' => '¡Datos actualizados exitosamente!',
+            'status' => 0,
+            'msg' => 'Registro no encontrado',
         ]);
-
     }
+
+    // Actualiza los campos si se proporcionan en la solicitud
+    $nuevosPuntos->nombrePunto = $request->input('nombrePunto', $nuevosPuntos->nombrePunto);
+    $nuevosPuntos->descripcionPunto = $request->input('descripcionPunto', $nuevosPuntos->descripcionPunto);
+    $nuevosPuntos->ubicacionPunto = $request->input('ubicacionPunto', $nuevosPuntos->ubicacionPunto);
+
+    // Verifica si se proporcionó una nueva imagen
+    if ($request->hasFile('galeria')) {
+        $imagen = $request->file('galeria');
+        $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
+        $imagen->move(public_path('storage/galeria'), $nombreImagen);
+        $nuevosPuntos->galeria = $nombreImagen;
+    }
+
+    $nuevosPuntos->save();
+
+    return response()->json([
+        'status' => 1,
+        'msg' => '¡Datos actualizados exitosamente!',
+    ]);
+
+}
+
+    
 
 
     public function showID($id)

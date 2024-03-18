@@ -55,43 +55,6 @@ class UsuariosController extends Controller
 }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    // public function createUsuarios( Request $request )
-    // {
-    //     $request->validate([
-    //         'nombre' => "required",
-    //         'apell1' => "required",
-    //         'apell2' => "required",
-    //         'cedula'=>"required",
-    //         'numero'=>"required",
-    //         'ocupacion'=> "required",
-    //         // 'rol'=>"required",
-    //         'email'=> "required",
-    //         'password'=>"required"
-    //     ]);
-        
-           
-    //         $usuarios = new Usuarios();
-    //         $usuarios->nombre = $request->nombre;
-    //         $usuarios->apell1 = $request->apell1;
-    //         $usuarios->apell2 = $request->apell2;
-    //         $usuarios->cedula = $request->cedula;
-    //         $usuarios->numero = $request->numero;
-    //         $usuarios->ocupacion = $request->ocupacion;
-    //        // $usuarios->rol = $request->rol;
-    //         $usuarios->email = $request->email;
-    //         $usuarios->password = Hash::make($request->password);
-    //        // $usuarios->status = $request->status;
-    //         $usuarios->save();
-    //         //Respuesta de la api
-    //         return response([
-    //             "status" => 1,
-    //             "msg" => "¡Datos agregados exitosamente!"
-    //         ]);
-    // }
-
-    /**
      * Display the specified resource.
      */
     public function show(Usuarios $usuarios)
@@ -142,6 +105,85 @@ class UsuariosController extends Controller
     }
     
 
+    public function loginAdmin(Request $request) {
+        // Valida los datos de entrada
+        $request->validate([
+            "email" => "required|email",
+            "password" => "required"
+        ]);
+    
+        // Busca al usuario por su dirección de correo electrónico y rol de administrador
+        $usuario = Usuarios::where("email", $request->email)
+            ->where("rol", "admin")
+            ->first();
+    
+        if ($usuario) { // Verifica si existe un usuario con el correo electrónico y rol de administrador proporcionado
+            if (Hash::check($request->password, $usuario->password)) { // Comprueba la contraseña utilizando Hash::check
+                // Crea y devuelve un token de autenticación válido
+                $token = $usuario->createToken("auth_token")->plainTextToken;
+                
+                return response()->json([
+                    "status" => 'Success',
+                    "token" => $token,
+                    "rol" => $usuario->rol,
+                ]);
+            } else {
+                // Contraseña incorrecta
+                return response()->json([
+                    "status" => 0,
+                    "msg" => "¡Contraseña incorrecta!"
+                    
+                ], 401); // 401 Unauthorized
+            }
+        } else {
+            // Usuario no encontrado
+            return response()->json([
+                "status" => 0,
+                "msg" => "¡Usuario no encontrado o no tiene rol de administrador!"
+            ], 404); // 404 Not Found
+        }
+    }
+    
+    public function loginVoluntario(Request $request) {
+        // Valida los datos de entrada
+        $request->validate([
+            "email" => "required|email",
+            "password" => "required"
+        ]);
+    
+        // Busca al usuario por su dirección de correo electrónico y rol de voluntario
+        $usuario = Usuarios::where("email", $request->email)
+            ->where("rol", "voluntario")
+            ->first();
+    
+        if ($usuario) { // Verifica si existe un usuario con el correo electrónico y rol de voluntario proporcionado
+            if (Hash::check($request->password, $usuario->password)) { // Comprueba la contraseña utilizando Hash::check
+                // Crea y devuelve un token de autenticación válido
+                $token = $usuario->createToken("auth_token")->plainTextToken;
+                
+                return response()->json([
+                    "status" => 'Success',
+                    "token" => $token,
+                    "rol" => $usuario->rol,
+                ]);
+            } else {
+                // Contraseña incorrecta
+                return response()->json([
+                    "status" => 0,
+                    "msg" => "¡Contraseña incorrecta!"
+                    
+                ], 401); // 401 Unauthorized
+            }
+        } else {
+            // Usuario no encontrado
+            return response()->json([
+                "status" => 0,
+                "msg" => "¡Usuario no encontrado o no tiene rol de voluntario!"
+            ], 404); // 404 Not Found
+        }
+    }
+    
+
     public function login(Request $request) {
         // Valida los datos de entrada
         $request->validate([
@@ -156,10 +198,12 @@ class UsuariosController extends Controller
             if (Hash::check($request->password, $usuario->password)) { // Comprueba la contraseña utilizando Hash::check
                 // Crea y devuelve un token de autenticación válido
                 $token = $usuario->createToken("auth_token")->plainTextToken;
-    
+                $rol = $usuario->rol;
+
                 return response()->json([
                     "status" => 'Success',
-                    "token" => $token,    
+                    "token" => $token,
+                    "rol" => $rol,    
                 ]);
             } else {
                 // Contraseña incorrecta
@@ -228,7 +272,6 @@ class UsuariosController extends Controller
         $usuarios->ocupacion = $request->input('ocupacion', $usuarios->ocupacion);
         $usuarios->rol = $request->input('rol', $usuarios->rol);
         $usuarios->email = $request->input('email', $usuarios->email);
-        $usuarios->password = $request->input('password', $usuarios->password);
         
         $usuarios->save();
         

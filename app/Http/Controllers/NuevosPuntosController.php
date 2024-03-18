@@ -74,6 +74,13 @@ class NuevosPuntosController extends Controller
         return $nuevosPuntos;
     }
 
+        public function showCount(NuevosPuntos $nuevosPuntos)
+    {
+        $count = NuevosPuntos::all()->count();
+        return response()->json(['count' => $count]);
+    }
+
+
     /**
      * Show the form for editing the specified resource.
      */

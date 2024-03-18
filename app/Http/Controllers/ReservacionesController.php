@@ -68,13 +68,11 @@ class ReservacionesController extends Controller
 
     $request->validate([
         'fechaReserva' => 'required',
-        'Cupo' => 'required',
-        'status' => 'required|in:Nueva,Terminada,Cancelada', // Valida que el valor esté entre las opciones permitidas
+        'status' => 'required|in:Nueva,Terminada,Cancelada,En Proceso', // Valida que el valor esté entre las opciones permitidas
     ]);
 
     // Asignar los valores solo si están presentes en la solicitud
     $reservaciones->fechaReserva = $request->input('fechaReserva', $reservaciones->fechaReserva);
-    $reservaciones->Cupo = $request->input('Cupo', $reservaciones->Cupo);
     $reservaciones->status = $request->input('status', $reservaciones->status);
 
     $reservaciones->save();
@@ -107,9 +105,30 @@ class ReservacionesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Reservaciones $reservaciones)
+    public function editStatus(Request $request, $id)
     {
-        //
+        $reservaciones = Reservaciones::find($id);
+    
+        if (!$reservaciones) {
+            return response()->json([
+                "status" => 0,
+                "msg" => "¡Reservacion no encontrado!"
+            ], 404);
+        }
+    
+        $request->validate([
+            'status' => 'required|in:Nueva,Terminada,Cancelada,En Proceso', // Agregado para validar el campo 'status'
+        ]);
+    
+        // Asignar el valor solo si está presente en la solicitud
+        $reservaciones->status = $request->input('status', $reservaciones->status); // Campo 'status' agregado
+    
+        $reservaciones->save();
+    
+        return response()->json([
+            "status" => 1,
+            "msg" => "¡Actualizado Correctamente!"
+        ]);
     }
 
     /**

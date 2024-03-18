@@ -13,6 +13,9 @@ use App\Http\Controllers\VOluntariadosController;
 use App\Http\Controllers\SolicitudesController;
 use App\Http\Controllers\UsuarioCampañaController;
 use App\Http\Controllers\UsuarioVoluntariadoController;
+use App\Http\Middleware\CheckAdminRole;
+use Illuminate\Http\Middleware\CheckResponseForModifications;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,13 +35,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::group(['middleware' => ["auth:sanctum"]], function(){
+Route::group(['middleware' => ["auth:sanctum", CheckAdminRole::class]], function(){
 
     
     Route::get('usuario-profile',[UsuariosController::class, 'usuarioProfile']);
     Route::get('logout',[UsuariosController::class, 'logout']);
     
-    Route::get('mostrar-campanas',[CampanasController::class, 'show']);
     
 //Usuarios
 Route::get('usuarios',[UsuariosController::class, 'show']);
@@ -66,6 +68,7 @@ Route::delete('reservaciones-delete/{id}',[ReservacionesController::class,'destr
 
 Route::put('reservaciones-update/{id}',[ReservacionesController::class,'updatereserva']);
 
+Route::put('reservacion-status/{id}',[ReservacionesController::class,'editStatus']);
 
 // Route::get('voluntarios',[VoluntariosController::class, 'show']);
 
@@ -79,6 +82,8 @@ Route::get('roles',[RolesController::class, 'show']);
 
 //Campañas
 
+Route::get('mostrar-campanas',[CampanasController::class, 'show']);
+    
 Route::post('create-campana',[CampanasController::class,'store']);
                                                         
 Route::put('campana-update/{id}',[CampanasController::class,'updateCampanas']);
@@ -109,6 +114,8 @@ Route::put('tipo-status/{id}',[TiposVolCampController::class,'editStatus']);
 Route::post('nuevo-punto', [NuevosPuntosController::class, 'store']);
 
 Route::get('Puntos',[NuevosPuntosController::class, 'show']);
+
+Route::get('ContadorPuntos',[NuevosPuntosController::class, 'showCount']);
 
 Route::delete('/delete-punto/{id}',[NuevosPuntosController::class,'destroy']);
 
@@ -149,7 +156,8 @@ Route::delete('solicitud-delete/{id}', [SolicitudesController::class, 'destroy']
 Route::post('create-usuario',[UsuariosController::class,'createUsuarios']);
 Route::post('login',[UsuariosController::class,'login']); 
 
-
+Route::post('loginAdmin',[UsuariosController::class,'loginAdmin']); 
+Route::post('loginVoluntario',[UsuariosController::class,'loginVoluntario']); 
 
 //UserCamp
 Route::post('crear-UsuCamp', [UsuarioCampañaController::class, 'create']);
@@ -157,6 +165,8 @@ Route::post('crear-UsuCamp', [UsuarioCampañaController::class, 'create']);
 Route::get('mostrar-UsuCamp', [UsuarioCampañaController::class, 'show']);
 
 Route::delete('participacion-delete/{id}', [UsuarioCampañaController::class, 'destroy']);
+
+Route::get('mostrar-campanasVol',[CampanasController::class, 'show']);
 
 //UserVol
 

@@ -13,8 +13,10 @@ use App\Http\Controllers\VOluntariadosController;
 use App\Http\Controllers\SolicitudesController;
 use App\Http\Controllers\UsuarioCampañaController;
 use App\Http\Controllers\UsuarioVoluntariadoController;
+use App\Http\Controllers\AuthController;
 use App\Http\Middleware\CheckAdminRole;
 use Illuminate\Http\Middleware\CheckResponseForModifications;
+use Tymon\JWTAuth\Contracts\Providers\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,30 +32,29 @@ use Illuminate\Http\Middleware\CheckResponseForModifications;
 // header('Access-Control-Allow-Methods:  POST, GET, OPTIONS, PUT, DELETE');
 // header('Access-Control-Allow-Headers:  Content-Type, X-Auth-Token, Origin, Authorization'); 
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 
-Route::group(['middleware' => ["auth:sanctum", CheckAdminRole::class]], function(){
+
+Route::group(['middleware' => ["auth:api", CheckAdminRole::class]], function(){
 
     
     Route::get('usuario-profile',[UsuariosController::class, 'usuarioProfile']);
     Route::get('logout',[UsuariosController::class, 'logout']);
     
-    
-//Usuarios
-Route::get('usuarios',[UsuariosController::class, 'show']);
 
-Route::put('user-update/{id}',[UsuariosController::class,'updateUsuario']);
+Route::get('showU', [AuthController::class, 'showUsers']);
 
-Route::delete('user-delete/{id}',[UsuariosController::class,'destroy']);
+Route::delete('deleteUser/{id}', [AuthController::class, 'destroy']);
 
-Route::get('usuarios/{id}', [UsuariosController::class, 'showID']);
+Route::put('user-update/{id}',[AuthController::class,'updateUser']);
 
-Route::get('usuarios',[UsuariosController::class, 'show']);
+Route::get('usuarios/{id}', [AuthController::class, 'showID']);
 
-Route::put('usuario-status/{id}',[UsuariosController::class,'editStatus']);
+
+Route::put('usuario-status/{id}',[AuthController::class,'editStatus']);
 
 
 //Reservaciones
@@ -147,14 +148,26 @@ Route::post('crear-solicitud', [SolicitudesController::class, 'createSolicitud']
 Route::get('mostrar-solicitudes', [SolicitudesController::class, 'show']);
 
 Route::delete('solicitud-delete/{id}', [SolicitudesController::class, 'destroy']);
+
+Route::post('crear-UsuVol', [UsuarioVoluntariadoController::class, 'create']);
+
+
 });
+
+
+
+
+Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
+Route::post('logout', [AuthController::class, 'logout']);
+Route::post('refresh', [AuthController::class, 'refresh']);
 
 
 
 
 //Login
 Route::post('create-usuario',[UsuariosController::class,'createUsuarios']);
-Route::post('login',[UsuariosController::class,'login']); 
+
 
 Route::post('loginAdmin',[UsuariosController::class,'loginAdmin']); 
 Route::post('loginVoluntario',[UsuariosController::class,'loginVoluntario']); 
@@ -168,11 +181,13 @@ Route::delete('participacion-delete/{id}', [UsuarioCampañaController::class, 'd
 
 Route::get('mostrar-campanasVol',[CampanasController::class, 'show']);
 
+
+
 //UserVol
 
-Route::post('crear-UsuVol', [UsuarioVoluntariadoController::class, 'create']);
 
 Route::get('mostrar-UsuVol', [UsuarioVoluntariadoController::class, 'show']);
 
 Route::delete('participacionVol-delete/{id}', [UsuarioVoluntariadoController::class, 'destroy']);
 
+Route::get('usuarios',[UsuariosController::class, 'show']);

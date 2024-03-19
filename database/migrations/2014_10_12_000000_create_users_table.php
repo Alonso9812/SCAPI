@@ -14,8 +14,15 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('apell1');
+            $table->string('apell2');
+            $table->string('cedula');
+            $table->integer('numero');
+            $table->string('ocupacion');
+            $table->string('rol')->default('voluntario'); // Establece el valor predeterminado como 'voluntario'
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('status')->default('Activo');
         });
     }
 

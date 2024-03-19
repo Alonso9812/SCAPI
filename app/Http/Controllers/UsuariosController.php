@@ -8,59 +8,33 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash; // Import Hash
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log; 
 
-
+use Tymon\JWTAuth\Facades\JWTAuth; // Importa JWTAuth
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UsuariosController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
+
     }
 
     public function createUsuarios(Request $request)
-{
-    $request->validate([
-        'nombre' => 'required',
-        'apell1' => 'required',
-        'apell2' => 'required',
-        'cedula' => 'required',
-        'numero' => 'required',
-        'ocupacion' => 'required',
-        // 'rol' => 'required',
-        'email' => 'required|email|unique:usuarios,email', // 'usuarios' debe ser el nombre de la tabla de usuarios en tu base de datos
-        'password' => 'required',
-    ]);
-
-    $usuarios = new Usuarios();
-    $usuarios->nombre = $request->nombre;
-    $usuarios->apell1 = $request->apell1;
-    $usuarios->apell2 = $request->apell2;
-    $usuarios->cedula = $request->cedula;
-    $usuarios->numero = $request->numero;
-    $usuarios->ocupacion = $request->ocupacion;
-    // $usuarios->rol = $request->rol;
-    $usuarios->email = $request->email;
-    $usuarios->password = Hash::make($request->password);
-    // $usuarios->status = $request->status;
-    $usuarios->save();
-
-    // Respuesta de la API
-    return response([
-        'status' => 1,
-        'msg' => '¡Datos agregados exitosamente!'
-    ]);
-}
-
+    {
+    }
     /**
      * Display the specified resource.
      */
-    public function show(Usuarios $usuarios)
+    public function show()
     {
         $usuarios = Usuarios::all();
-        return $usuarios;
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $usuarios,
+        ]);
     }
 
     public function showID($id)
@@ -105,133 +79,76 @@ class UsuariosController extends Controller
     }
     
 
-    public function loginAdmin(Request $request) {
-        // Valida los datos de entrada
-        $request->validate([
-            "email" => "required|email",
-            "password" => "required"
-        ]);
-    
-        // Busca al usuario por su dirección de correo electrónico y rol de administrador
-        $usuario = Usuarios::where("email", $request->email)
-            ->where("rol", "admin")
-            ->first();
-    
-        if ($usuario) { // Verifica si existe un usuario con el correo electrónico y rol de administrador proporcionado
-            if (Hash::check($request->password, $usuario->password)) { // Comprueba la contraseña utilizando Hash::check
-                // Crea y devuelve un token de autenticación válido
-                $token = $usuario->createToken("auth_token")->plainTextToken;
-                
-                return response()->json([
-                    "status" => 'Success',
-                    "token" => $token,
-                    "rol" => $usuario->rol,
-                ]);
-            } else {
-                // Contraseña incorrecta
-                return response()->json([
-                    "status" => 0,
-                    "msg" => "¡Contraseña incorrecta!"
-                    
-                ], 401); // 401 Unauthorized
-            }
-        } else {
-            // Usuario no encontrado
-            return response()->json([
-                "status" => 0,
-                "msg" => "¡Usuario no encontrado o no tiene rol de administrador!"
-            ], 404); // 404 Not Found
-        }
-    }
-    
-    public function loginVoluntario(Request $request) {
-        // Valida los datos de entrada
-        $request->validate([
-            "email" => "required|email",
-            "password" => "required"
-        ]);
-    
-        // Busca al usuario por su dirección de correo electrónico y rol de voluntario
-        $usuario = Usuarios::where("email", $request->email)
-            ->where("rol", "voluntario")
-            ->first();
-    
-        if ($usuario) { // Verifica si existe un usuario con el correo electrónico y rol de voluntario proporcionado
-            if (Hash::check($request->password, $usuario->password)) { // Comprueba la contraseña utilizando Hash::check
-                // Crea y devuelve un token de autenticación válido
-                $token = $usuario->createToken("auth_token")->plainTextToken;
-                
-                return response()->json([
-                    "status" => 'Success',
-                    "token" => $token,
-                    "rol" => $usuario->rol,
-                ]);
-            } else {
-                // Contraseña incorrecta
-                return response()->json([
-                    "status" => 0,
-                    "msg" => "¡Contraseña incorrecta!"
-                    
-                ], 401); // 401 Unauthorized
-            }
-        } else {
-            // Usuario no encontrado
-            return response()->json([
-                "status" => 0,
-                "msg" => "¡Usuario no encontrado o no tiene rol de voluntario!"
-            ], 404); // 404 Not Found
-        }
-    }
-    
+public function loginAdmin(Request $request)
+{
+    // Validación de los datos de entrada
+    $request->validate([
+        'email' => 'required|string|email',
+        'password' => 'required|string',
+    ]);
 
-    public function login(Request $request) {
-        // Valida los datos de entrada
-        $request->validate([
-            "email" => "required|email",
-            "password" => "required"
-        ]);
-    
-        // Busca al usuario por su dirección de correo electrónico
-        $usuario = Usuarios::where("email", $request->email)->first();
-    
-        if ($usuario) { // Verifica si existe un usuario con el correo electrónico proporcionado
-            if (Hash::check($request->password, $usuario->password)) { // Comprueba la contraseña utilizando Hash::check
-                // Crea y devuelve un token de autenticación válido
-                $token = $usuario->createToken("auth_token")->plainTextToken;
-                $rol = $usuario->rol;
-
-                return response()->json([
-                    "status" => 'Success',
-                    "token" => $token,
-                    "rol" => $rol,    
-                ]);
-            } else {
-                // Contraseña incorrecta
-                return response()->json([
-                    "status" => 0,
-                    "msg" => "¡Contraseña incorrecta!"
-                    
-                ], 401); // 401 Unauthorized
-            }
-        } else {
-            // Usuario no encontrado
-            return response()->json([
-                "status" => 0,
-                "msg" => "¡Usuario no encontrado!"
-            ], 404); // 404 Not Found
-        }
-    }
-
-    public function logout(){
-
-        auth()->user()->tokens()->delete();
-
+    // Intenta autenticar al usuario
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        // Si la autenticación falla, devuelve una respuesta de error
         return response()->json([
-            "status" => 1,
-            "msg"=> "Cierre de sesion",
-
-        ]);
+            'status' => 'error',
+            'message' => 'Unauthorized',
+        ], 401);
     }
+
+    // Obtiene al usuario autenticado
+    $user = Auth::user();
+
+    // Verifica si el usuario tiene el rol de administrador
+    if ($user->rol !== 'admin') {
+        // Si el usuario no es un administrador, devuelve una respuesta de error
+        return response()->json([
+            'status' => 'error',
+            'message' => 'El usuario no tiene el rol de administrador',
+        ], 403);
+    }
+
+    // Genera el token JWT para el usuario autenticado
+    $token = Auth::guard('api')->login($user);
+
+    // Devuelve una respuesta JSON con el usuario y el token JWT
+    return response()->json([
+        'status' => 'success',
+        'user' => $user,
+        'authorisation' => [
+            'token' => $token,
+            'type' => 'bearer',
+        ]
+    ]);
+}
+    
+
+public function login(Request $request)
+{
+    $credentials = $request->only('email', 'password');
+
+    try {
+        if (! $token = JWTAuth::attempt($credentials)) {
+            // Log de intento de inicio de sesión fallido
+            Log::info('Inicio de sesión fallido para el usuario: ' . $credentials['email']);
+            
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    } catch (JWTException $e) {
+        // Log de error al crear el token
+        Log::error('Error al crear el token: ' . $e->getMessage());
+        
+        return response()->json(['error' => 'Could not create token'], 500);
+    }
+
+    // Log de inicio de sesión exitoso
+    Log::info('Inicio de sesión exitoso para el usuario: ' . $credentials['email']);
+    
+    return response()->json(compact('token'));
+}
+
+
+
 
     public function UsuarioProfile(){
 
@@ -257,13 +174,8 @@ class UsuariosController extends Controller
         
         $request->validate([
             
-            'rol' => 'required|in:admin,voluntario', // Valida que el valor esté entre las opciones permitidas
+            'rol' => 'required|in:admin,voluntario', 
         ]);
-        // No es necesario verificar "auth()->user()" aquí, ya que esto se usa para verificar
-        // si el usuario autenticado es el propietario del recurso. Si no tienes un requisito
-        // específico para verificar la propiedad del usuario, puedes omitir esto.
-        
-        // Asignar los valores solo si están presentes en la solicitud
         $usuarios->nombre = $request->input('nombre', $usuarios->nombre);
         $usuarios->apell1 = $request->input('apell1', $usuarios->apell1);
         $usuarios->apell2 = $request->input('apell2', $usuarios->apell2);
@@ -315,5 +227,6 @@ class UsuariosController extends Controller
         "status" => 1,
         "msg" => "Usuario eliminado exitosamente."
     ]);
+
 }
 }

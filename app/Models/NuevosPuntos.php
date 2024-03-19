@@ -15,7 +15,7 @@ class NuevosPuntos extends Model
         'nombrePunto',
         'descripcionPunto',
         'ubicacionPunto' ,
-        'galeria',
+        'galeria'=> 'file|mimes:jpg,jpeg,png,gif|max:4098',
         'statusPunto',
     ];
     public $timestamps = false;

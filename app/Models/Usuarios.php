@@ -10,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 class Usuarios extends Model
 {
     
-    use HasApiTokens, HasFactory;
+    use  HasFactory;
 
     protected $table = 'usuarios';
 

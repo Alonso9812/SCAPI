@@ -12,7 +12,7 @@ class UsuarioVoluntariado extends Model
     protected $table = 'usuario_voluntariados';
 
     protected $fillable = [
-        'usuario_id',
+        'users_id',
         'voluntariado_id',
     ];
 

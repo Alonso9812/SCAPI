@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\NuevosPuntos;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class NuevosPuntosController extends Controller
 {
@@ -27,32 +28,32 @@ class NuevosPuntosController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $request->validate([
-        'nombrePunto' => 'required',
-        'descripcionPunto' => 'required',
-        'ubicacionPunto' => 'required',
-        'galeria' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096', // Permitir archivos de hasta 4MB
-    ]);
+    {
+        $request->validate([
+            'nombrePunto' => 'required',
+            'descripcionPunto' => 'required',
+            'ubicacionPunto' => 'required',
+            'galeria' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096', // Permitir archivos de hasta 4MB
+        ]);
 
-    $imagen = $request->file('galeria');
-    $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
-    
-    // Almacenar la imagen en el directorio public/galeria
-    $imagen->move(public_path('storage\galeria'), $nombreImagen);
+        $imagen = $request->file('galeria');
+        $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
+        
+        // Almacenar la imagen en el directorio public/galeria
+        $imagen->move(public_path('storage\galeria'), $nombreImagen);
 
-    $nuevosPuntos = new NuevosPuntos();
-    $nuevosPuntos->nombrePunto = $request->input('nombrePunto');
-    $nuevosPuntos->descripcionPunto = $request->input('descripcionPunto');
-    $nuevosPuntos->ubicacionPunto = $request->input('ubicacionPunto');
-    $nuevosPuntos->galeria = $nombreImagen;
-    $nuevosPuntos->save();
+        $nuevosPuntos = new NuevosPuntos();
+        $nuevosPuntos->nombrePunto = $request->input('nombrePunto');
+        $nuevosPuntos->descripcionPunto = $request->input('descripcionPunto');
+        $nuevosPuntos->ubicacionPunto = $request->input('ubicacionPunto');
+        $nuevosPuntos->galeria = $nombreImagen;
+        $nuevosPuntos->save();
 
-    return response()->json([
-        'status' => 1,
-        'msg' => '¡Nuevo punto de interés agregado exitosamente!',
-    ]);
-}
+        return response()->json([
+            'status' => 1,
+            'msg' => '¡Nuevo punto de interés agregado exitosamente!',
+        ]);
+    }
 
     public function showImage($nombreImagen)
     {
@@ -74,7 +75,7 @@ class NuevosPuntosController extends Controller
         return $nuevosPuntos;
     }
 
-        public function showCount(NuevosPuntos $nuevosPuntos)
+    public function showCount(NuevosPuntos $nuevosPuntos)
     {
         $count = NuevosPuntos::all()->count();
         return response()->json(['count' => $count]);
@@ -118,51 +119,33 @@ class NuevosPuntosController extends Controller
     /**
      * Update the specified resource in storage.
      */
-  /**
- * Update the specified resource in storage.
- */
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'nombrePunto' => 'required',
-        'descripcionPunto' => 'required',
-        'ubicacionPunto' => 'required',
-        'galeria' => 'image|mimes:jpeg,png,jpg,gif|max:4096', // Permitir archivos de hasta 4MB
-    ]);
+    public function update(Request $request, $id)
+    {
+        $nuevosPuntos = NuevosPuntos::find($id);
 
-    $nuevosPuntos = NuevosPuntos::find($id);
+        if (!$nuevosPuntos) {
+            return response()->json(['message' => 'Punto de interés sostenible no encontrado'], 404);
+        }
 
-    if (!$nuevosPuntos) {
+        $request->validate([
+            'nombrePunto' => 'required',
+            'descripcionPunto' => 'required',
+            'ubicacionPunto' => 'required',
+            
+        ]);
+
+        
+
+        $nuevosPuntos->nombrePunto = $request->input('nombrePunto');
+        $nuevosPuntos->descripcionPunto = $request->input('descripcionPunto');
+        $nuevosPuntos->ubicacionPunto = $request->input('ubicacionPunto');
+        $nuevosPuntos->save();
+
         return response()->json([
-            'status' => 0,
-            'msg' => 'Registro no encontrado',
+            'status' => 1,
+            'msg' => '¡Punto de interés actualizado exitosamente!',
         ]);
     }
-
-    // Actualiza los campos si se proporcionan en la solicitud
-    $nuevosPuntos->nombrePunto = $request->input('nombrePunto', $nuevosPuntos->nombrePunto);
-    $nuevosPuntos->descripcionPunto = $request->input('descripcionPunto', $nuevosPuntos->descripcionPunto);
-    $nuevosPuntos->ubicacionPunto = $request->input('ubicacionPunto', $nuevosPuntos->ubicacionPunto);
-
-    // Verifica si se proporcionó una nueva imagen
-    if ($request->hasFile('galeria')) {
-        $imagen = $request->file('galeria');
-        $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
-        $imagen->move(public_path('storage/galeria'), $nombreImagen);
-        $nuevosPuntos->galeria = $nombreImagen;
-    }
-
-    $nuevosPuntos->save();
-
-    return response()->json([
-        'status' => 1,
-        'msg' => '¡Datos actualizados exitosamente!',
-    ]);
-
-}
-
-    
-
 
     public function showID($id)
     {
@@ -182,14 +165,25 @@ public function update(Request $request, $id)
      */
     public function destroy(NuevosPuntos $nuevosPuntos, $id)
     {
+        // Buscar el punto de interés por su ID
         $nuevosPuntos = NuevosPuntos::find($id);
-        if(!$nuevosPuntos){
+    
+        if (!$nuevosPuntos) {
             return response()->json([
                 "status" => 0,
                 "msg" => "Punto no encontrado."
             ], 404);
         }
-        
+    
+        // Obtener el nombre de la imagen antes de eliminar el modelo
+        $nombreImagen = $nuevosPuntos->galeria;
+    
+        // Eliminar la imagen del directorio de almacenamiento si existe
+        if ($nombreImagen && file_exists(public_path("storage/galeria/{$nombreImagen}"))) {
+            unlink(public_path("storage/galeria/{$nombreImagen}"));
+        }
+    
+        // Eliminar el modelo NuevosPuntos
         $nuevosPuntos->delete();
     
         return response()->json([
@@ -197,5 +191,4 @@ public function update(Request $request, $id)
             "msg" => "Punto eliminado exitosamente."
         ]);
     }
-
 }

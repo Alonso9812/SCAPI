@@ -112,7 +112,7 @@ class AuthController extends Controller
                 'cedula' => 'string|max:255',
                 'numero' => 'string|max:255',
                 'ocupacion' => 'string|max:255',
-                'rol' => 'required|in:admin,voluntario', 
+                
             ]);
     
             // Asignar el nuevo rol al usuario objetivo
@@ -139,6 +139,36 @@ class AuthController extends Controller
             'user' => $targetUser,
         ]);
     }
+
+
+   
+
+    public function editRol(Request $request, $id)
+    {
+        $user = User::find($id);
+    
+        if (!$user) {
+            return response()->json([
+                "status" => 0,
+                "msg" => "¡Usuario no encontrado!"
+            ], 404);
+        }
+    
+        $request->validate([
+            'rol' => 'required|in:admin,voluntario',  // Agregado para validar el campo 'status'
+        ]);
+    
+        // Asignar el valor solo si está presente en la solicitud
+        $user->rol = $request->input('rol', $user->rol); // Campo 'status' agregado
+    
+        $user->save();
+    
+        return response()->json([
+            "status" => 1,
+            "msg" => "¡Actualizado Correctamente!"
+        ]);
+    }
+    
 
     public function editStatus(Request $request, $id)
     {

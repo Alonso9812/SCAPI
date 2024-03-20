@@ -68,12 +68,11 @@ class ReservacionesController extends Controller
 
     $request->validate([
         'fechaReserva' => 'required',
-        'status' => 'required|in:Nueva,Terminada,Cancelada,En Proceso', // Valida que el valor esté entre las opciones permitidas
     ]);
 
     // Asignar los valores solo si están presentes en la solicitud
     $reservaciones->fechaReserva = $request->input('fechaReserva', $reservaciones->fechaReserva);
-    $reservaciones->status = $request->input('status', $reservaciones->status);
+
 
     $reservaciones->save();
 

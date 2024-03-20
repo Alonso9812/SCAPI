@@ -53,6 +53,9 @@ Route::put('user-update/{id}',[AuthController::class,'updateUser']);
 
 Route::get('usuarios/{id}', [AuthController::class, 'showID']);
 
+Route::put('Rol-update/{id}', [AuthController::class, 'editRol']);
+
+
 
 Route::put('usuario-status/{id}',[AuthController::class,'editStatus']);
 

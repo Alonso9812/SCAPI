@@ -11,9 +11,10 @@ use App\Http\Controllers\NuevosPuntosController;
 use App\Http\Controllers\TiposVolCampController;
 use App\Http\Controllers\VOluntariadosController;
 use App\Http\Controllers\SolicitudesController;
-use App\Http\Controllers\UsuarioCampañaController;
+use App\Http\Controllers\UsuarioCampanaController;
 use App\Http\Controllers\UsuarioVoluntariadoController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContadorController;
 use App\Http\Middleware\CheckAdminRole;
 use Illuminate\Http\Middleware\CheckResponseForModifications;
 use Tymon\JWTAuth\Contracts\Providers\Auth;
@@ -176,11 +177,11 @@ Route::post('loginAdmin',[UsuariosController::class,'loginAdmin']);
 Route::post('loginVoluntario',[UsuariosController::class,'loginVoluntario']); 
 
 //UserCamp
-Route::post('crear-UsuCamp', [UsuarioCampañaController::class, 'create']);
+Route::post('crear-UsuCamp', [UsuarioCampanaController::class, 'create']);
 
-Route::get('mostrar-UsuCamp', [UsuarioCampañaController::class, 'show']);
+Route::get('mostrar-UsuCamp', [UsuarioCampanaController::class, 'show']);
 
-Route::delete('participacion-delete/{id}', [UsuarioCampañaController::class, 'destroy']);
+Route::delete('participacion-delete/{id}', [UsuarioCampanaController::class, 'destroy']);
 
 Route::get('mostrar-campanasVol',[CampanasController::class, 'show']);
 
@@ -194,3 +195,5 @@ Route::get('mostrar-UsuVol', [UsuarioVoluntariadoController::class, 'show']);
 Route::delete('participacionVol-delete/{id}', [UsuarioVoluntariadoController::class, 'destroy']);
 
 Route::get('usuarios',[UsuariosController::class, 'show']);
+
+Route::get('contador',[ContadorController::class], 'show');

@@ -1,0 +1,10 @@
+
+El script de la base de datos se encuentra en la
+carpeta db-script ya va cargada con datos y para 
+poder usar el sistema completo db+api+front utiliza
+estas credenciales al momento de iniciar sesión al dasboard
+
+usuario: jordi@gmail.com
+contraseña: 12345678
+
+
